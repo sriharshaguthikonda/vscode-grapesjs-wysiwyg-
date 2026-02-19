@@ -1,28 +1,36 @@
-import { Uri, ExtensionContext } from 'vscode';
+import { ExtensionContext, Uri, Webview } from 'vscode';
 import * as cheerio from 'cheerio';
 import { join } from 'path';
 import PluginsManager from './PluginsManager';
 import { getNonce, isURL } from './utils';
 
 export default class ContentProvider {
-  public static getContent(context: ExtensionContext, content?: string | undefined) {
+  public static getContent(
+    context: ExtensionContext,
+    webview: Webview,
+    content?: string | undefined
+  ) {
+    const toWebviewUri = (uri: Uri) => {
+      const anyWebview = webview as any;
+      return typeof anyWebview.asWebviewUri === 'function'
+        ? anyWebview.asWebviewUri(uri)
+        : uri.with({ scheme: 'vscode-resource' });
+    };
+
     const plugins = PluginsManager.getAll();
     const pluginsFiles = plugins.map(({ path }) => {
       const p = path || '';
 
-      return !isURL(p) ? Uri.file(p).with({ scheme: 'vscode-resource' }) : p;
+      return !isURL(p) ? toWebviewUri(Uri.file(p)) : p;
     });
-    const vendorsUri = Uri.file(
-      join(context.extensionPath, '/out/ui/vendors.bundle.js')
-    ).with({ scheme: 'vscode-resource' });
-    const grapesUri = Uri.file(join(context.extensionPath, '/out/ui/grapes.min.js')).with({
-      scheme: 'vscode-resource'
-    });
-    const scriptUri = Uri.file(join(context.extensionPath, '/out/ui/app.bundle.js')).with({
-      scheme: 'vscode-resource'
-    });
+    const vendorsUri = toWebviewUri(
+      Uri.file(join(context.extensionPath, '/out/ui/vendors.bundle.js'))
+    );
+    const grapesUri = toWebviewUri(Uri.file(join(context.extensionPath, '/out/ui/grapes.min.js')));
+    const scriptUri = toWebviewUri(Uri.file(join(context.extensionPath, '/out/ui/app.bundle.js')));
 
     const nonce = getNonce();
+    const cspSource = (webview as any).cspSource || 'vscode-resource:';
 
     return `<!DOCTYPE html>
 						<html lang="en">
@@ -33,16 +41,16 @@ export default class ContentProvider {
 							Use a content security policy to only allow loading images from https or from our extension directory,
 							and only allow scripts that have a specific nonce.
 							-->
-							<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data: vscode-resource: https: http:; style-src 'unsafe-inline' vscode-resource: https: http:; script-src 'nonce-${nonce}' 'unsafe-eval' https: http:; font-src 'self' data: 'unsafe-inline' vscode-resource: https: http:;">
+							<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${cspSource} https: http: data:; style-src 'unsafe-inline' ${cspSource} https: http:; script-src 'nonce-${nonce}' 'unsafe-eval' ${cspSource} https: http:; font-src ${cspSource} data: https: http:;">
 	
 							<meta name="viewport" content="width=device-width, initial-scale=1.0">
 							<title>GrapesJS</title>
-							<script nonce="${nonce}" src="${vendorsUri}"></script>
-							<script nonce="${nonce}" src="${grapesUri}"></script>
+							<script nonce="${nonce}" src="${vendorsUri.toString()}"></script>
+							<script nonce="${nonce}" src="${grapesUri.toString()}"></script>
 							${pluginsFiles
                 .map(
                   plugin =>
-                    `<script nonce="${nonce}" src="${plugin ? plugin : ''}"></script>`
+                    `<script nonce="${nonce}" src="${plugin ? plugin.toString() : ''}"></script>`
                 )
                 .join('')}
 							<script nonce="${nonce}">
@@ -74,7 +82,7 @@ export default class ContentProvider {
 									</div>
 								</div>
 							</div>
-							<script nonce="${nonce}" src="${scriptUri}"></script>
+							<script nonce="${nonce}" src="${scriptUri.toString()}"></script>
 						</body>
 						</html>`;
   }

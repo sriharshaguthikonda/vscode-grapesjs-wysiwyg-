@@ -35,13 +35,19 @@ export default class GrapesEditorManager {
         });
       }, 300);
     } else {
+      const localResourceRoots = [vscode.Uri.file(context.extensionPath)];
+      if (vscode.workspace.workspaceFolders) {
+        localResourceRoots.push(...vscode.workspace.workspaceFolders.map(folder => folder.uri));
+      }
+
       const panel = vscode.window.createWebviewPanel(
         GrapesEditorManager.viewType,
         'Grapesjs Editor',
         vscode.ViewColumn.Two,
         {
           enableScripts: true,
-          retainContextWhenHidden: true
+          retainContextWhenHidden: true,
+          localResourceRoots
         }
       );
 
@@ -97,7 +103,11 @@ export default class GrapesEditorManager {
     this._panel.onDidChangeViewState(({ webviewPanel }) => {
       this.setWebviewActiveContext(webviewPanel.active);
     });
-    this._panel.webview.html = ContentProvider.getContent(context, activeContent);
+    this._panel.webview.html = ContentProvider.getContent(
+      context,
+      this._panel.webview,
+      activeContent
+    );
     this._panel.webview.onDidReceiveMessage(
       message => {
         switch (message.command) {

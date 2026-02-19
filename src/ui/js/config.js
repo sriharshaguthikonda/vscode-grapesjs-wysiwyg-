@@ -1,6 +1,8 @@
 import editBlock from './plugins/editBlock';
 
 const vscode = acquireVsCodeApi();
+const allowScripts = Boolean(window.grapesjsAllowScripts);
+const editBlockPlugin = editor => editBlock(editor, { allowScripts });
 
 export default {
   // Indicate where to init the editor. You can also pass an HTMLElement
@@ -9,19 +11,19 @@ export default {
 	// As an alternative we could use: `components: '<h1>Hello World Component!</h1>'`,
 	fromElement: true,
 	// Allow script tags in parsed HTML (legacy option for older GrapesJS)
-	allowScripts: 1,
+	allowScripts: allowScripts ? 1 : 0,
 	// Size of the editor
 	height: '100%',
 	width: 'auto',
-	plugins: initPlugins(window.plugins),
+	plugins: initPlugins(window.plugins, editBlockPlugin),
 	pluginsOpts: initPluginsOptions(window.pluginsOptions),
 	// Disable the storage manager for the moment
 	storageManager: { type: null },
 	// Keep script tags and inline handlers when parsing HTML
 	parser: {
 		optionsHtml: {
-			allowScripts: true,
-			allowUnsafeAttr: true
+			allowScripts,
+			allowUnsafeAttr: allowScripts
 		}
 	},
 	// Avoid any default panel
@@ -440,10 +442,10 @@ export default {
 	}
 }
 
-function initPlugins(plugins) {
+function initPlugins(plugins, editBlockPlugin) {
 	return [].concat(
 		plugins,
-		[editBlock]
+		[editBlockPlugin]
 	)
 }
 

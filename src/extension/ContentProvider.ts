@@ -8,7 +8,8 @@ export default class ContentProvider {
   public static getContent(
     context: ExtensionContext,
     webview: Webview,
-    content?: string | undefined
+    content?: string | undefined,
+    allowScripts: boolean = false
   ) {
     const toWebviewUri = (uri: Uri) => {
       const anyWebview = webview as any;
@@ -31,6 +32,9 @@ export default class ContentProvider {
 
     const nonce = getNonce();
     const cspSource = (webview as any).cspSource || 'vscode-resource:';
+    const scriptSrc = allowScripts
+      ? `'nonce-${nonce}' 'unsafe-inline' 'unsafe-eval' ${cspSource} https: http:`
+      : `'nonce-${nonce}' 'unsafe-eval' ${cspSource} https: http:`;
 
     return `<!DOCTYPE html>
 						<html lang="en">
@@ -41,7 +45,7 @@ export default class ContentProvider {
 							Use a content security policy to only allow loading images from https or from our extension directory,
 							and only allow scripts that have a specific nonce.
 							-->
-							<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${cspSource} https: http: data:; style-src 'unsafe-inline' ${cspSource} https: http:; script-src 'nonce-${nonce}' 'unsafe-inline' 'unsafe-eval' ${cspSource} https: http:; font-src ${cspSource} data: https: http:;">
+							<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${cspSource} https: http: data:; style-src 'unsafe-inline' ${cspSource} https: http:; script-src ${scriptSrc}; font-src ${cspSource} data: https: http:;">
 	
 							<meta name="viewport" content="width=device-width, initial-scale=1.0">
 							<title>GrapesJS</title>
@@ -60,6 +64,7 @@ export default class ContentProvider {
                     plugin ? { options: plugin.options, name: plugin.name } : {}
                   )
                 )}
+								window.grapesjsAllowScripts = ${allowScripts};
 							</script>
 						</head>
 						<body>

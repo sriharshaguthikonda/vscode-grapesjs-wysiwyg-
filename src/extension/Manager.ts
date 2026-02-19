@@ -92,6 +92,7 @@ export default class GrapesEditorManager {
   private constructor(panel: vscode.WebviewPanel, context: vscode.ExtensionContext) {
     const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
     const delay: number = config.get('grapesjs.delay') || 0;
+    const allowScripts: boolean = !!config.get('grapesjs.allowScripts');
     const activeEditor = vscode.window.activeTextEditor;
     const activeContent =
       activeEditor &&
@@ -106,7 +107,8 @@ export default class GrapesEditorManager {
     this._panel.webview.html = ContentProvider.getContent(
       context,
       this._panel.webview,
-      activeContent
+      activeContent,
+      allowScripts
     );
     this._panel.webview.onDidReceiveMessage(
       message => {

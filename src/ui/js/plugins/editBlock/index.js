@@ -25,7 +25,7 @@ export default (editor, opts = {}) => {
       buttonLabel: 'Modify',
 
       // Allow rendering <script> tags in the canvas
-      allowScripts: true,
+      allowScripts: false,
 
       placeholderScript: `<div style="pointer-events: none; padding: 10px;">
       <svg viewBox="0 0 24 24" style="height: 30px; vertical-align: middle;">

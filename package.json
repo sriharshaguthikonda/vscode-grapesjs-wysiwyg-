@@ -39,6 +39,11 @@
 					"type": "string",
 					"default": "./",
 					"description": "Path to your Grapesjs plugins folder"
+				},
+				"grapesjs.allowScripts": {
+					"type": "boolean",
+					"default": false,
+					"description": "Allow <script> tags and inline JavaScript to run inside the GrapesJS canvas."
 				}
 			}
 		},

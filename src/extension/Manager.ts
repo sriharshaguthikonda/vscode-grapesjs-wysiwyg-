@@ -1,5 +1,8 @@
 import * as vscode from 'vscode';
+import * as cheerio from 'cheerio';
+import { dirname, resolve } from 'path';
 import ContentProvider from './ContentProvider';
+import { isURL } from './utils';
 
 let timerId: NodeJS.Timeout;
 
@@ -20,6 +23,11 @@ export default class GrapesEditorManager {
           ? activeEditor.document.getText()
           : '';
       const { _panel } = GrapesEditorManager.currentPanel;
+      const stylesheets = GrapesEditorManager.getStylesheetLinks(
+        activeContent,
+        activeEditor ? activeEditor.document : undefined,
+        _panel.webview
+      );
 
       _panel.reveal(vscode.ViewColumn.Two);
       _panel.webview.postMessage({
@@ -31,7 +39,8 @@ export default class GrapesEditorManager {
       timerId = setTimeout(() => {
         _panel.webview.postMessage({
           command: 'change',
-          content: activeContent
+          content: activeContent,
+          stylesheets
         });
       }, 300);
     } else {
@@ -81,10 +90,16 @@ export default class GrapesEditorManager {
       contentChanges.length > 0
     ) {
       const content = document.getText();
+      const stylesheets = GrapesEditorManager.getStylesheetLinks(
+        content,
+        document,
+        this._panel.webview
+      );
 
       this._panel.webview.postMessage({
         command: 'change',
-        content
+        content,
+        stylesheets
       });
     }
   }
@@ -186,6 +201,12 @@ export default class GrapesEditorManager {
   private updateActiveEditor(editor: vscode.TextEditor | undefined) {
     if (editor && GrapesEditorManager.isAcceptableLaguage(editor.document.languageId)) {
       this._activeEditor = editor;
+      const content = editor.document.getText();
+      const stylesheets = GrapesEditorManager.getStylesheetLinks(
+        content,
+        editor.document,
+        this._panel.webview
+      );
       this._panel.webview.postMessage({
         command: 'loading'
       });
@@ -193,12 +214,80 @@ export default class GrapesEditorManager {
       timerId = setTimeout(() => {
         this._panel.webview.postMessage({
           command: 'change',
-          content: editor.document.getText()
+          content,
+          stylesheets
         });
       }, 300);
       return;
     }
 
     this._activeEditor = undefined;
+  }
+
+  private static getStylesheetLinks(
+    html: string,
+    document: vscode.TextDocument | undefined,
+    webview: vscode.Webview
+  ) {
+    if (!document) return [];
+
+    const $ = cheerio.load(html);
+    const links: string[] = [];
+    const baseDir = document.uri.scheme === 'file' ? dirname(document.uri.fsPath) : undefined;
+    const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
+    const workspaceRoot = workspaceFolder ? workspaceFolder.uri.fsPath : undefined;
+    const toWebviewUri = (uri: vscode.Uri) => {
+      const anyWebview = webview as any;
+      return typeof anyWebview.asWebviewUri === 'function'
+        ? anyWebview.asWebviewUri(uri)
+        : uri.with({ scheme: 'vscode-resource' });
+    };
+
+    $('link[rel="stylesheet"]').each((_, element) => {
+      const href = $(element).attr('href');
+      if (!href) return;
+      const trimmed = href.trim();
+      if (!trimmed) return;
+
+      if (isURL(trimmed) || trimmed.startsWith('data:')) {
+        links.push(trimmed);
+        return;
+      }
+
+      if (trimmed.startsWith('//')) {
+        links.push(`https:${trimmed}`);
+        return;
+      }
+
+      if (
+        trimmed.startsWith('vscode-resource:') ||
+        trimmed.startsWith('vscode-webview-resource:')
+      ) {
+        links.push(trimmed);
+        return;
+      }
+
+      if (trimmed.startsWith('file:')) {
+        try {
+          links.push(toWebviewUri(vscode.Uri.parse(trimmed)).toString());
+        } catch (err) {
+          // Ignore invalid file URLs.
+        }
+        return;
+      }
+
+      if ((trimmed.startsWith('/') || trimmed.startsWith('\\')) && workspaceRoot) {
+        const resolvedPath = resolve(workspaceRoot, `.${trimmed}`);
+        links.push(toWebviewUri(vscode.Uri.file(resolvedPath)).toString());
+        return;
+      }
+
+      if (!baseDir) return;
+
+      const resolvedPath = resolve(baseDir, trimmed);
+      links.push(toWebviewUri(vscode.Uri.file(resolvedPath)).toString());
+    });
+
+    return links;
   }
 }

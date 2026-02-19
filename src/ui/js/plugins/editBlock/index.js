@@ -24,6 +24,9 @@ export default (editor, opts = {}) => {
       // Label for the default save button
       buttonLabel: 'Modify',
 
+      // Allow rendering <script> tags in the canvas
+      allowScripts: true,
+
       placeholderScript: `<div style="pointer-events: none; padding: 10px;">
       <svg viewBox="0 0 24 24" style="height: 30px; vertical-align: middle;">
         <path d="M13 14h-2v-4h2m0 8h-2v-2h2M1 21h22L12 2 1 21z"></path>

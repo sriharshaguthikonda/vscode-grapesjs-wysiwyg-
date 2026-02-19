@@ -41,7 +41,7 @@ export default class ContentProvider {
 							Use a content security policy to only allow loading images from https or from our extension directory,
 							and only allow scripts that have a specific nonce.
 							-->
-							<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${cspSource} https: http: data:; style-src 'unsafe-inline' ${cspSource} https: http:; script-src 'nonce-${nonce}' 'unsafe-eval' ${cspSource} https: http:; font-src ${cspSource} data: https: http:;">
+							<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${cspSource} https: http: data:; style-src 'unsafe-inline' ${cspSource} https: http:; script-src 'nonce-${nonce}' 'unsafe-inline' 'unsafe-eval' ${cspSource} https: http:; font-src ${cspSource} data: https: http:;">
 	
 							<meta name="viewport" content="width=device-width, initial-scale=1.0">
 							<title>GrapesJS</title>

@@ -3,7 +3,7 @@ import { keyBlockCode, typeBlockCode, commandName } from './config';
 export default (editor, opts = {}) => {
   let timedInterval;
   const comps = editor.DomComponents;
-  const { toolbarBtnBlockCode } = opts;
+  const { toolbarBtnBlockCode, allowScripts } = opts;
 
   comps.addType('default', {
     model: {
@@ -48,8 +48,8 @@ export default (editor, opts = {}) => {
           const content = model.get(keyBlockCode) || '';
           let droppable = 1;
 
-          // Avoid rendering codes with scripts
-          if (content.indexOf('<script') >= 0) {
+          // Avoid rendering codes with scripts unless explicitly allowed
+          if (!allowScripts && content.indexOf('<script') >= 0) {
             this.el.innerHTML = opts.placeholderScript;
             droppable = 0;
           }

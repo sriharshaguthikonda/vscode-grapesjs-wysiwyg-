@@ -8,6 +8,8 @@ export default {
 	// Get the content for the canvas directly from the element
 	// As an alternative we could use: `components: '<h1>Hello World Component!</h1>'`,
 	fromElement: true,
+	// Allow script tags in parsed HTML (legacy option for older GrapesJS)
+	allowScripts: 1,
 	// Size of the editor
 	height: '100%',
 	width: 'auto',
@@ -15,6 +17,13 @@ export default {
 	pluginsOpts: initPluginsOptions(window.pluginsOptions),
 	// Disable the storage manager for the moment
 	storageManager: { type: null },
+	// Keep script tags and inline handlers when parsing HTML
+	parser: {
+		optionsHtml: {
+			allowScripts: true,
+			allowUnsafeAttr: true
+		}
+	},
 	// Avoid any default panel
 	panels: {
 		defaults: [

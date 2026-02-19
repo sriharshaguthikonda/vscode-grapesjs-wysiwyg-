@@ -1,6 +1,9 @@
 :root {
-	--bg-panel-header: rgba(128, 128, 128, 0.2);
-	--bg-panel: rgb(37, 37, 38);
+	--bg-panel-header: var(--vscode-sideBarSectionHeader-background, rgba(128, 128, 128, 0.2));
+	--bg-panel: var(--vscode-sideBar-background, rgb(37, 37, 38));
+	--editor-bg: var(--vscode-editor-background, #1e1e1e);
+	--editor-fg: var(--vscode-editor-foreground, #d4d4d4);
+	--accent-fg: var(--vscode-textLink-foreground, #ffca6f);
 }
 html, body {
 	margin: 0;
@@ -9,7 +12,8 @@ html, body {
 	width: 100%;
 }
 body {
-	background-color: aliceblue;
+	background-color: var(--editor-bg);
+	color: var(--editor-fg);
 }
 
 body.loading {
@@ -55,8 +59,8 @@ body.loading:after {
 }
 
 .gjs-sm-label {
-	color: #ffca6f;
-  fill: #ffca6f;
+	color: var(--accent-fg);
+  fill: var(--accent-fg);
 }
 
 .editor-row {

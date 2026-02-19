@@ -25,9 +25,17 @@ export default class PluginsManager {
   }
 
   private static _getDirectories(srcPath: string) {
-    return fs
-      .readdirSync(srcPath)
-      .filter(file => fs.statSync(resolve(srcPath, file)).isDirectory());
+    if (!fs.existsSync(srcPath)) return [];
+
+    try {
+      if (!fs.statSync(srcPath).isDirectory()) return [];
+      return fs
+        .readdirSync(srcPath)
+        .filter(file => fs.statSync(resolve(srcPath, file)).isDirectory());
+    } catch (err) {
+      vscode.window.showErrorMessage(err.message || err);
+      return [];
+    }
   }
 
   private static _getConfig(srcPath: string) {
@@ -37,8 +45,13 @@ export default class PluginsManager {
           .readFileSync(resolve(srcPath, 'package.json'))
           .toString('utf8');
         const jsonConfig = JSON.parse(contentConfig);
+        const grapesjsConfig = getNestedObject(jsonConfig, ['vscode', 'grapesjs']);
 
-        return Object.assign(getNestedObject(jsonConfig, ['vscode', 'grapesjs']), {
+        if (grapesjsConfig === undefined || grapesjsConfig === null || grapesjsConfig === false) {
+          return;
+        }
+
+        return Object.assign({}, typeof grapesjsConfig === 'object' ? grapesjsConfig : {}, {
           name: jsonConfig.name || '',
           main: jsonConfig.main || ''
         });

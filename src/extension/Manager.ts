@@ -125,7 +125,8 @@ export default class GrapesEditorManager {
 
     this.updateActiveEditor(activeEditor);
 
-    vscode.workspace.onDidChangeTextDocument((event: vscode.TextDocumentChangeEvent) => {
+    const documentChangeDisposable = vscode.workspace.onDidChangeTextDocument(
+      (event: vscode.TextDocumentChangeEvent) => {
       const { document, contentChanges } = event;
 
       if (
@@ -147,6 +148,7 @@ export default class GrapesEditorManager {
     });
 
     this._disposables.push(
+      documentChangeDisposable,
       vscode.window.onDidChangeActiveTextEditor(editor => {
         this.updateActiveEditor(editor);
       })

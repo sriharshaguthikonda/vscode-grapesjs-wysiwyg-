@@ -156,6 +156,7 @@ export default class GrapesEditorManager {
   }
 
   public dispose() {
+    this.setWebviewActiveContext(false);
     GrapesEditorManager.currentPanel = undefined;
     this._panel.dispose();
     while (this._disposables.length) {

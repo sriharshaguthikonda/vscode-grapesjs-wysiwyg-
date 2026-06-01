@@ -1,0 +1,46 @@
+﻿{
+    "schemaVersion":  "repo-map-artifact-branch/v1",
+    "repo":  "sriharshaguthikonda/vscode-grapesjs-wysiwyg-",
+    "generatedAt":  "2026-06-01T06:12:40.2241101Z",
+    "source":  "Repo_maps GitHub footprint publish runner",
+    "publishBranch":  "repo-intel-artifacts",
+    "mapCount":  5,
+    "totalBytes":  2174116,
+    "maps":  [
+                 {
+                     "name":  "fix/review-issues",
+                     "ref":  "refs/remotes/origin/fix/review-issues",
+                     "commit":  "fd3eb865a3f9022b7bca6b876e3653bf684580ca",
+                     "path":  ".repo-intel/branches/remote-origin/fix-review-issues__fd3eb865a3f9/repo-map-full.json",
+                     "bytes":  323781
+                 },
+                 {
+                     "name":  "master",
+                     "ref":  "refs/remotes/origin/master",
+                     "commit":  "0c2713a32cdce153bd74a68dc3cd90fae0424713",
+                     "path":  ".repo-intel/branches/remote-origin/master__0c2713a32cdc/repo-map-full.json",
+                     "bytes":  321820
+                 },
+                 {
+                     "name":  "plugins",
+                     "ref":  "refs/remotes/origin/plugins",
+                     "commit":  "749047fb93a72ea16c5906aaf79b96db84e64156",
+                     "path":  ".repo-intel/branches/remote-origin/plugins__749047fb93a7/repo-map-full.json",
+                     "bytes":  321820
+                 },
+                 {
+                     "name":  "test",
+                     "ref":  "refs/remotes/origin/test",
+                     "commit":  "105869d2069200fdbe4b005231ea222f8c1deff6",
+                     "path":  ".repo-intel/branches/remote-origin/test__105869d20692/repo-map-full.json",
+                     "bytes":  859713
+                 },
+                 {
+                     "name":  "windsurf-compat",
+                     "ref":  "refs/remotes/origin/windsurf-compat",
+                     "commit":  "9cd8ff0fc1984d2c46f56ea948621214357d4631",
+                     "path":  ".repo-intel/branches/remote-origin/windsurf-compat__9cd8ff0fc198/repo-map-full.json",
+                     "bytes":  330078
+                 }
+             ]
+}
